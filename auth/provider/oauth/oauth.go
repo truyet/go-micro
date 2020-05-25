@@ -5,7 +5,29 @@ import (
 	"net/url"
 
 	"github.com/micro/go-micro/v2/auth/provider"
+	"golang.org/x/oauth2"
 )
+
+// Endpoints is a map containing all the oauth endpoints for supported providers
+var Endpoints = map[string]oauth2.Endpoint{
+	"amazon": oauth2.Endpoint{
+		AuthURL:  "https://www.amazon.com/ap/oa",
+		TokenURL: "https://api.amazon.com/auth/o2/token",
+	},
+	"facebook": oauth2.Endpoint{
+		AuthURL:  "https://www.facebook.com/v3.2/dialog/oauth",
+		TokenURL: "https://graph.facebook.com/v3.2/oauth/access_token",
+	},
+	"github": oauth2.Endpoint{
+		AuthURL:  "https://github.com/login/oauth/authorize",
+		TokenURL: "https://github.com/login/oauth/access_token",
+	},
+	"google": oauth2.Endpoint{
+		AuthURL:   "https://accounts.google.com/o/oauth2/auth",
+		TokenURL:  "https://oauth2.googleapis.com/token",
+		AuthStyle: oauth2.AuthStyleInParams,
+	},
+}
 
 // NewProvider returns an initialised oauth provider
 func NewProvider(opts ...provider.Option) provider.Provider {

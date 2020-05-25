@@ -5,16 +5,18 @@ type Option func(*Options)
 
 // Options a provider can have
 type Options struct {
+	// Type of provider, e.g. oauth
+	Type string `json:"type"`
 	// ClientID is the application's ID.
-	ClientID string
+	ClientID string `json:"client_id"`
 	// ClientSecret is the application's secret.
-	ClientSecret string
+	ClientSecret string `json:"client_secret"`
 	// Endpoint for the provider
-	Endpoint string
+	Endpoint string `json:"endpoint"`
 	// Redirect url incase of UI
-	Redirect string
+	Redirect string `json:"redirect"`
 	// Scope of the oauth request
-	Scope string
+	Scope string `json:"scope"`
 }
 
 // Credentials is an option which sets the client id and secret

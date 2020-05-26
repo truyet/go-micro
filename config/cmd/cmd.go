@@ -305,9 +305,14 @@ var (
 			Usage:   "The client secret to be used for oauth",
 		},
 		&cli.StringFlag{
-			Name:    "auth_provider_endpoint",
-			EnvVars: []string{"MICRO_AUTH_PROVIDER_ENDPOINT"},
-			Usage:   "The enpoint to be used for oauth",
+			Name:    "auth_provider_auth_url",
+			EnvVars: []string{"MICRO_AUTH_PROVIDER_AUTH_URL"},
+			Usage:   "The enpoint to be used for oauth2 auth",
+		},
+		&cli.StringFlag{
+			Name:    "auth_provider_token_url",
+			EnvVars: []string{"MICRO_AUTH_PROVIDER_TOKEN_URL"},
+			Usage:   "The enpoint to be used for oauth2 token",
 		},
 		&cli.StringFlag{
 			Name:    "auth_provider_redirect",
@@ -716,8 +721,11 @@ func (c *cmd) Before(ctx *cli.Context) error {
 		if len(clientID) > 0 || len(clientSecret) > 0 {
 			provOpts = append(provOpts, provider.Credentials(clientID, clientSecret))
 		}
-		if e := ctx.String("auth_provider_endpoint"); len(e) > 0 {
-			provOpts = append(provOpts, provider.Endpoint(e))
+		if e := ctx.String("auth_provider_auth_url"); len(e) > 0 {
+			provOpts = append(provOpts, provider.AuthURL(e))
+		}
+		if e := ctx.String("auth_provider_token_url"); len(e) > 0 {
+			provOpts = append(provOpts, provider.TokenURL(e))
 		}
 		if r := ctx.String("auth_provider_redirect"); len(r) > 0 {
 			provOpts = append(provOpts, provider.Redirect(r))

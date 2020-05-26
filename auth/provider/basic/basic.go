@@ -24,11 +24,3 @@ func (b *basic) String() string {
 func (b *basic) Options() provider.Options {
 	return b.opts
 }
-
-func (b *basic) Endpoint(...provider.EndpointOption) string {
-	return ""
-}
-
-func (b *basic) Redirect() string {
-	return ""
-}

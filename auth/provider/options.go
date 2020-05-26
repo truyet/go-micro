@@ -1,5 +1,7 @@
 package provider
 
+import "golang.org/x/oauth2"
+
 // Option returns a function which sets an option
 type Option func(*Options)
 
@@ -11,8 +13,12 @@ type Options struct {
 	ClientID string `json:"client_id"`
 	// ClientSecret is the application's secret.
 	ClientSecret string `json:"client_secret"`
-	// Endpoint for the provider
-	Endpoint string `json:"endpoint"`
+	// AuthURL for the provider
+	AuthURL string `json:"auth_url"`
+	// TokenURL for the provider
+	TokenURL string `json:"token_url"`
+	// AuthStyle to use on token request
+	AuthStyle oauth2.AuthStyle
 	// Redirect url incase of UI
 	Redirect string `json:"redirect"`
 	// Scope of the oauth request
@@ -27,10 +33,24 @@ func Credentials(id, secret string) Option {
 	}
 }
 
-// Endpoint sets the endpoint option
-func Endpoint(e string) Option {
+// AuthURL sets the auth url option
+func AuthURL(a string) Option {
 	return func(o *Options) {
-		o.Endpoint = e
+		o.AuthURL = a
+	}
+}
+
+// TokenURL sets the token url option
+func TokenURL(a string) Option {
+	return func(o *Options) {
+		o.TokenURL = a
+	}
+}
+
+// AuthStyle sets the oauth style option
+func AuthStyle(a oauth2.AuthStyle) Option {
+	return func(o *Options) {
+		o.AuthStyle = a
 	}
 }
 

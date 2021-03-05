@@ -9,21 +9,21 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/asim/go-micro/v3/api"
+	"github.com/asim/go-micro/v3/api/handler"
+	"github.com/asim/go-micro/v3/api/internal/proto"
+	"github.com/asim/go-micro/v3/client"
+	"github.com/asim/go-micro/v3/codec"
+	"github.com/asim/go-micro/v3/codec/jsonrpc"
+	"github.com/asim/go-micro/v3/codec/protorpc"
+	"github.com/asim/go-micro/v3/errors"
+	"github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/metadata"
+	"github.com/asim/go-micro/v3/registry"
+	"github.com/asim/go-micro/v3/selector"
+	"github.com/asim/go-micro/v3/util/ctx"
+	"github.com/asim/go-micro/v3/util/qson"
 	jsonpatch "github.com/evanphx/json-patch/v5"
-	"github.com/micro/go-micro/v2/api"
-	"github.com/micro/go-micro/v2/api/handler"
-	"github.com/micro/go-micro/v2/api/internal/proto"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/client/selector"
-	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/codec/jsonrpc"
-	"github.com/micro/go-micro/v2/codec/protorpc"
-	"github.com/micro/go-micro/v2/errors"
-	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/metadata"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/util/ctx"
-	"github.com/micro/go-micro/v2/util/qson"
 	"github.com/oxtoacart/bpool"
 )
 
@@ -122,7 +122,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	md["Host"] = r.Host
 	md["Method"] = r.Method
 	// get canonical headers
-	for k, _ := range r.Header {
+	for k := range r.Header {
 		// may be need to get all values for key like r.Header.Values() provide in go 1.14
 		md[textproto.CanonicalMIMEHeaderKey(k)] = r.Header.Get(k)
 	}

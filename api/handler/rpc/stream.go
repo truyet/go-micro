@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asim/go-micro/v3/api"
+	"github.com/asim/go-micro/v3/client"
+	raw "github.com/asim/go-micro/v3/codec/bytes"
+	"github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/selector"
 	"github.com/gobwas/httphead"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"github.com/micro/go-micro/v2/api"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/client/selector"
-	raw "github.com/micro/go-micro/v2/codec/bytes"
-	"github.com/micro/go-micro/v2/logger"
 )
 
 // serveWebsocket will stream rpc back over websockets assuming json
@@ -38,7 +38,7 @@ func serveWebsocket(ctx context.Context, w http.ResponseWriter, r *http.Request,
 	}
 
 	hdr := make(http.Header)
-	if proto, ok := r.Header["Sec-WebSocket-Protocol"]; ok {
+	if proto, ok := r.Header["Sec-Websocket-Protocol"]; ok {
 		for _, p := range proto {
 			switch p {
 			case "binary":
@@ -185,7 +185,11 @@ func writeLoop(rw io.ReadWriter, stream client.Stream) {
 			if err != nil {
 				if wserr, ok := err.(wsutil.ClosedError); ok {
 					switch wserr.Code {
+					case ws.StatusGoingAway:
+						// this happens when user leave the page
+						return
 					case ws.StatusNormalClosure, ws.StatusNoStatusRcvd:
+						// this happens when user close ws connection, or we don't get any status
 						return
 					}
 				}

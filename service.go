@@ -7,19 +7,17 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/micro/go-micro/v2/auth"
-	"github.com/micro/go-micro/v2/client"
-	"github.com/micro/go-micro/v2/config/cmd"
-	"github.com/micro/go-micro/v2/debug/service/handler"
-	"github.com/micro/go-micro/v2/debug/stats"
-	"github.com/micro/go-micro/v2/debug/trace"
-	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/plugin"
-	"github.com/micro/go-micro/v2/server"
-	"github.com/micro/go-micro/v2/store"
-	authutil "github.com/micro/go-micro/v2/util/auth"
-	signalutil "github.com/micro/go-micro/v2/util/signal"
-	"github.com/micro/go-micro/v2/util/wrapper"
+	"github.com/asim/go-micro/v3/client"
+	"github.com/asim/go-micro/v3/cmd"
+	"github.com/asim/go-micro/v3/debug/handler"
+	"github.com/asim/go-micro/v3/debug/stats"
+	"github.com/asim/go-micro/v3/debug/trace"
+	"github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/plugins"
+	"github.com/asim/go-micro/v3/server"
+	"github.com/asim/go-micro/v3/store"
+	signalutil "github.com/asim/go-micro/v3/util/signal"
+	"github.com/asim/go-micro/v3/util/wrapper"
 )
 
 type service struct {
@@ -35,21 +33,14 @@ func newService(opts ...Option) Service {
 	// service name
 	serviceName := options.Server.Options().Name
 
-	// we pass functions to the wrappers since the values can change during initialisation
-	authFn := func() auth.Auth { return options.Server.Options().Auth }
-	cacheFn := func() *client.Cache { return options.Client.Options().Cache }
-
 	// wrap client to inject From-Service header on any calls
 	options.Client = wrapper.FromService(serviceName, options.Client)
 	options.Client = wrapper.TraceCall(serviceName, trace.DefaultTracer, options.Client)
-	options.Client = wrapper.CacheClient(cacheFn, options.Client)
-	options.Client = wrapper.AuthClient(authFn, options.Client)
 
 	// wrap the server to provide handler stats
 	options.Server.Init(
 		server.WrapHandler(wrapper.HandlerStats(stats.DefaultStats)),
 		server.WrapHandler(wrapper.TraceHandler(trace.DefaultTracer)),
-		server.WrapHandler(wrapper.AuthHandler(authFn)),
 	)
 
 	// set opts
@@ -176,11 +167,6 @@ func (s *service) Stop() error {
 }
 
 func (s *service) Run() error {
-	// generate an auth account
-	if err := authutil.Generate(s.Server().Options().Id, s.Name(), s.Options().Auth); err != nil {
-		return err
-	}
-
 	// register the debug handler
 	s.opts.Server.Handle(
 		s.opts.Server.NewHandler(

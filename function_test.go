@@ -5,16 +5,16 @@ import (
 	"sync"
 	"testing"
 
-	proto "github.com/micro/go-micro/v2/debug/service/proto"
-	"github.com/micro/go-micro/v2/registry/memory"
-	"github.com/micro/go-micro/v2/util/test"
+	proto "github.com/asim/go-micro/v3/debug/proto"
+	"github.com/asim/go-micro/v3/registry"
+	"github.com/asim/go-micro/v3/util/test"
 )
 
 func TestFunction(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	r := memory.NewRegistry(memory.Services(test.Data))
+	r := registry.NewMemoryRegistry(registry.Services(test.Data))
 
 	// create service
 	fn := NewFunction(

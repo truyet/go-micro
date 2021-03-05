@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/api"
-	"github.com/micro/go-micro/v2/api/router"
-	"github.com/micro/go-micro/v2/api/router/util"
-	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/metadata"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/registry/cache"
+	"github.com/asim/go-micro/v3/api"
+	"github.com/asim/go-micro/v3/api/router"
+	"github.com/asim/go-micro/v3/api/router/util"
+	"github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/metadata"
+	"github.com/asim/go-micro/v3/registry"
+	"github.com/asim/go-micro/v3/registry/cache"
 )
 
 // endpoint struct, that holds compiled pcre
@@ -188,7 +188,7 @@ func (r *registryRouter) store(services []*registry.Service) {
 		for _, p := range ep.Endpoint.Path {
 			var pcreok bool
 
-			if p[0] == '^' && p[len(p)-1] != '$' {
+			if p[0] == '^' && p[len(p)-1] == '$' {
 				pcrereg, err := regexp.CompilePOSIX(p)
 				if err == nil {
 					cep.pcreregs = append(cep.pcreregs, pcrereg)

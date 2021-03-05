@@ -12,17 +12,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/broker"
-	"github.com/micro/go-micro/v2/codec"
-	raw "github.com/micro/go-micro/v2/codec/bytes"
-	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/metadata"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/transport"
-	"github.com/micro/go-micro/v2/util/addr"
-	"github.com/micro/go-micro/v2/util/backoff"
-	mnet "github.com/micro/go-micro/v2/util/net"
-	"github.com/micro/go-micro/v2/util/socket"
+	"github.com/asim/go-micro/v3/broker"
+	"github.com/asim/go-micro/v3/codec"
+	raw "github.com/asim/go-micro/v3/codec/bytes"
+	"github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/metadata"
+	"github.com/asim/go-micro/v3/registry"
+	"github.com/asim/go-micro/v3/transport"
+	"github.com/asim/go-micro/v3/util/addr"
+	"github.com/asim/go-micro/v3/util/backoff"
+	mnet "github.com/asim/go-micro/v3/util/net"
+	"github.com/asim/go-micro/v3/util/socket"
 )
 
 type rpcServer struct {
@@ -363,11 +363,12 @@ func (s *rpcServer) ServeConn(sock transport.Socket) {
 			r = rpcRouter{h: handler}
 		}
 
+		// wait for two coroutines to exit
+		// serve the request and process the outbound messages
+		wg.Add(2)
+
 		// process the outbound messages from the socket
 		go func(id string, psock *socket.Socket) {
-			// wait for processing to exit
-			wg.Add(1)
-
 			defer func() {
 				// TODO: don't hack this but if its grpc just break out of the stream
 				// We do this because the underlying connection is h2 and its a stream
@@ -405,9 +406,6 @@ func (s *rpcServer) ServeConn(sock transport.Socket) {
 
 		// serve the request in a go routine as this may be a stream
 		go func(id string, psock *socket.Socket) {
-			// add to the waitgroup
-			wg.Add(1)
-
 			defer func() {
 				// release the socket
 				pool.Release(psock)

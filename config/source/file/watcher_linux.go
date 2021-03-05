@@ -5,8 +5,8 @@ package file
 import (
 	"os"
 
+	"github.com/asim/go-micro/v3/config/source"
 	"github.com/fsnotify/fsnotify"
-	"github.com/micro/go-micro/v2/config/source"
 )
 
 type watcher struct {
@@ -41,7 +41,7 @@ func (w *watcher) Next() (*source.ChangeSet, error) {
 
 	// try get the event
 	select {
-	case event, _ := <-w.fw.Events:
+	case event := <-w.fw.Events:
 		if event.Op == fsnotify.Rename {
 			// check existence of file, and add watch again
 			_, err := os.Stat(event.Name)

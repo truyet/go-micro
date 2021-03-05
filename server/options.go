@@ -6,12 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/auth"
-	"github.com/micro/go-micro/v2/broker"
-	"github.com/micro/go-micro/v2/codec"
-	"github.com/micro/go-micro/v2/debug/trace"
-	"github.com/micro/go-micro/v2/registry"
-	"github.com/micro/go-micro/v2/transport"
+	"github.com/asim/go-micro/v3/broker"
+	"github.com/asim/go-micro/v3/codec"
+	"github.com/asim/go-micro/v3/debug/trace"
+	"github.com/asim/go-micro/v3/registry"
+	"github.com/asim/go-micro/v3/transport"
 )
 
 type Options struct {
@@ -19,7 +18,6 @@ type Options struct {
 	Broker       broker.Broker
 	Registry     registry.Registry
 	Tracer       trace.Tracer
-	Auth         auth.Auth
 	Transport    transport.Transport
 	Metadata     map[string]string
 	Name         string
@@ -58,10 +56,6 @@ func newOptions(opt ...Option) Options {
 
 	for _, o := range opt {
 		o(&opts)
-	}
-
-	if opts.Auth == nil {
-		opts.Auth = auth.DefaultAuth
 	}
 
 	if opts.Broker == nil {
@@ -168,13 +162,6 @@ func Registry(r registry.Registry) Option {
 func Tracer(t trace.Tracer) Option {
 	return func(o *Options) {
 		o.Tracer = t
-	}
-}
-
-// Auth mechanism for role based access control
-func Auth(a auth.Auth) Option {
-	return func(o *Options) {
-		o.Auth = a
 	}
 }
 

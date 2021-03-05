@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/micro/go-micro/v2/runtime/local/process"
+	"github.com/asim/go-micro/v3/runtime/local/process"
 )
 
 func (p *Process) Exec(exe *process.Executable) error {
@@ -68,8 +68,7 @@ func (p *Process) Kill(pid *process.PID) error {
 
 	// now kill it
 	// using -ve PID kills the process group which we created in Fork()
-	return syscall.Kill(-id, syscall.SIGKILL)
-
+	return syscall.Kill(-id, syscall.SIGTERM)
 }
 
 func (p *Process) Wait(pid *process.PID) error {

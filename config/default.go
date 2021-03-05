@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/go-micro/v2/config/loader"
-	"github.com/micro/go-micro/v2/config/loader/memory"
-	"github.com/micro/go-micro/v2/config/reader"
-	"github.com/micro/go-micro/v2/config/reader/json"
-	"github.com/micro/go-micro/v2/config/source"
+	"github.com/asim/go-micro/v3/config/loader"
+	"github.com/asim/go-micro/v3/config/loader/memory"
+	"github.com/asim/go-micro/v3/config/reader"
+	"github.com/asim/go-micro/v3/config/reader/json"
+	"github.com/asim/go-micro/v3/config/source"
 )
 
 type config struct {
@@ -41,12 +41,16 @@ func newConfig(opts ...Option) (Config, error) {
 
 func (c *config) Init(opts ...Option) error {
 	c.opts = Options{
-		Loader: memory.NewLoader(),
 		Reader: json.NewReader(),
 	}
 	c.exit = make(chan bool)
 	for _, o := range opts {
 		o(&c.opts)
+	}
+
+	// default loader uses the configured reader
+	if c.opts.Loader == nil {
+		c.opts.Loader = memory.NewLoader(memory.WithReader(c.opts.Reader))
 	}
 
 	err := c.opts.Loader.Load(c.opts.Source...)
@@ -81,6 +85,11 @@ func (c *config) run() {
 			}
 
 			c.Lock()
+
+			if c.snap.Version >= snap.Version {
+				c.Unlock()
+				continue
+			}
 
 			// save
 			c.snap = snap

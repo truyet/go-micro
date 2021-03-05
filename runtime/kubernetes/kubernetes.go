@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/runtime"
-	"github.com/micro/go-micro/v2/util/kubernetes/client"
+	log "github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/runtime"
+	"github.com/asim/go-micro/v3/util/kubernetes/client"
 )
 
 // action to take on runtime service
@@ -167,11 +167,10 @@ func (k *kubernetes) getService(labels map[string]string, opts ...client.GetOpti
 
 			// parse out deployment status and inject into service metadata
 			if len(kdep.Status.Conditions) > 0 {
-				svc.Metadata["status"] = kdep.Status.Conditions[0].Type
+				svc.Status(kdep.Status.Conditions[0].Type, nil)
 				svc.Metadata["started"] = kdep.Status.Conditions[0].LastUpdateTime
-				delete(svc.Metadata, "error")
 			} else {
-				svc.Metadata["status"] = "n/a"
+				svc.Status("n/a", nil)
 			}
 
 			// get the real status
@@ -214,8 +213,7 @@ func (k *kubernetes) getService(labels map[string]string, opts ...client.GetOpti
 					}
 				}
 				// TODO: set from terminated
-
-				svc.Metadata["status"] = status
+				svc.Status(status, nil)
 			}
 
 			// save deployment

@@ -15,9 +15,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/asim/go-micro/v3/logger"
+	"github.com/asim/go-micro/v3/util/mdns"
 	"github.com/google/uuid"
-	"github.com/micro/go-micro/v2/logger"
-	"github.com/micro/go-micro/v2/util/mdns"
 )
 
 var (
@@ -252,7 +252,7 @@ func (m *mdnsRegistry) Register(service *Service, opts ...RegisterOption) error 
 			continue
 		}
 
-		srv, err := mdns.NewServer(&mdns.Config{Zone: s})
+		srv, err := mdns.NewServer(&mdns.Config{Zone: s, LocalhostChecking: true})
 		if err != nil {
 			gerr = err
 			continue
@@ -563,9 +563,7 @@ func (m *mdnsWatcher) Next() (*Result, error) {
 			if len(m.wo.Service) > 0 && txt.Service != m.wo.Service {
 				continue
 			}
-
 			var action string
-
 			if e.TTL == 0 {
 				action = "delete"
 			} else {
@@ -584,9 +582,18 @@ func (m *mdnsWatcher) Next() (*Result, error) {
 				continue
 			}
 
+			var addr string
+			if len(e.AddrV4) > 0 {
+				addr = e.AddrV4.String()
+			} else if len(e.AddrV6) > 0 {
+				addr = "[" + e.AddrV6.String() + "]"
+			} else {
+				addr = e.Addr.String()
+			}
+
 			service.Nodes = append(service.Nodes, &Node{
 				Id:       strings.TrimSuffix(e.Name, suffix),
-				Address:  fmt.Sprintf("%s:%d", e.AddrV4.String(), e.Port),
+				Address:  fmt.Sprintf("%s:%d", addr, e.Port),
 				Metadata: txt.Metadata,
 			})
 

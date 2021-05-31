@@ -14,9 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/asim/go-micro/v3/cmd"
 	"github.com/asim/go-micro/v3/broker"
+	"github.com/asim/go-micro/v3/cmd"
 	"github.com/asim/go-micro/v3/errors"
 	"github.com/asim/go-micro/v3/logger"
 	meta "github.com/asim/go-micro/v3/metadata"
@@ -26,6 +25,7 @@ import (
 	"github.com/asim/go-micro/v3/util/backoff"
 	mgrpc "github.com/asim/go-micro/v3/util/grpc"
 	mnet "github.com/asim/go-micro/v3/util/net"
+	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/netutil"
 
 	"google.golang.org/grpc"
@@ -405,6 +405,7 @@ func (g *grpcServer) processRequest(stream grpc.ServerStream, service *service, 
 				// micro.Error now proto based and we can attach it to grpc status
 				statusCode = microError(verr)
 				statusDesc = verr.Error()
+				verr.Detail = strings.ToValidUTF8(verr.Detail, "")
 				errStatus, err = status.New(statusCode, statusDesc).WithDetails(verr)
 				if err != nil {
 					return err
@@ -477,6 +478,7 @@ func (g *grpcServer) processStream(stream grpc.ServerStream, service *service, m
 			// micro.Error now proto based and we can attach it to grpc status
 			statusCode = microError(verr)
 			statusDesc = verr.Error()
+			verr.Detail = strings.ToValidUTF8(verr.Detail, "")
 			errStatus, err = status.New(statusCode, statusDesc).WithDetails(verr)
 			if err != nil {
 				return err
@@ -913,7 +915,10 @@ func (g *grpcServer) Start() error {
 		}
 
 		// return error chan
-		var ch chan error
+		var (
+			err error
+			ch  chan error
+		)
 
 	Loop:
 		for {
@@ -957,18 +962,18 @@ func (g *grpcServer) Start() error {
 			g.srv.Stop()
 		}
 
-		// close transport
-		ch <- nil
-
 		if logger.V(logger.InfoLevel, logger.DefaultLogger) {
 			logger.Infof("Broker [%s] Disconnected from %s", config.Broker.String(), config.Broker.Address())
 		}
 		// disconnect broker
-		if err := config.Broker.Disconnect(); err != nil {
+		if err = config.Broker.Disconnect(); err != nil {
 			if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
 				logger.Errorf("Broker [%s] disconnect error: %v", config.Broker.String(), err)
 			}
 		}
+
+		// close transport
+		ch <- err
 	}()
 
 	// mark the server as started

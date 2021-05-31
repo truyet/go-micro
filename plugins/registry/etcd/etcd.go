@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/asim/go-micro/v3/cmd"
 	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
 	hash "github.com/mitchellh/hashstructure"
@@ -32,6 +33,10 @@ type etcdRegistry struct {
 	sync.RWMutex
 	register map[string]uint64
 	leases   map[string]clientv3.LeaseID
+}
+
+func init() {
+	cmd.DefaultRegistries["etcd"] = NewRegistry
 }
 
 func NewRegistry(opts ...registry.Option) registry.Registry {
@@ -56,6 +61,7 @@ func configure(e *etcdRegistry, opts ...registry.Option) error {
 	if e.options.Timeout == 0 {
 		e.options.Timeout = 5 * time.Second
 	}
+	config.DialTimeout = e.options.Timeout
 
 	if e.options.Secure || e.options.TLSConfig != nil {
 		tlsConfig := e.options.TLSConfig
